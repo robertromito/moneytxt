@@ -1,0 +1,5 @@
+#/usr/bin/env bash
+files=$1
+echo "Analyzing $files"
+means=$(grep --no-filename '"' $files | cut -d, -f2 | sed -e 's/^"//' -e 's/"$//' | awk '{s+=$1} END {print s}')
+echo "Your means: $means"
