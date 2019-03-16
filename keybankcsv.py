@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 
-
 def split_by_account(csv):
     accounts = []
     current_account = None
@@ -30,11 +29,11 @@ def sum_transactions_for(keybank_csv):
                            if '"' in f]
     return sum(transaction_amounts)
 
-print("Welcome to the KeyBank bank account csv analyzer")
-
 if len(sys.argv) < 2:
    print(f'usage: keybankcsv.py [glob path of keybank csv files dir]')
    exit(1)
+
+print("Analysys of Key Bank csv download files:")
 
 total_means = 0
 for csv in sys.argv[1:]:
@@ -42,11 +41,17 @@ for csv in sys.argv[1:]:
         transactions = f.readlines()
         accounts = split_by_account(transactions)
         print(f'\n{csv}')
+        print("-"*60)
         for account in accounts:
             account_means = sum_transactions_for(account)
-            print(f'{account[0].rstrip()}: {account_means:10,.2f}')
+            print(f'{account[0].rstrip():50}{account_means:10,.2f}')
         csv_means = sum_transactions_for(transactions)
-        print(f'Total: {csv_means:10,.2f}')
+        print("-"*60)
+        print("{0:50}{1:10,.2f}".format("Total",csv_means))
+        print("-"*60)
         total_means += csv_means
 
-print(f'\nGrand Total: {total_means:10,.2f}')
+print("\n")
+print("-"*60)
+print("{0:50}{1:10,.2f}".format("Grand Total", total_means))
+print("-"*60)
