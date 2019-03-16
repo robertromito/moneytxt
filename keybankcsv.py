@@ -1,6 +1,23 @@
 #!/usr/bin/env python3
 import sys
 
+
+def split_by_account(csv):
+    accounts = []
+    current_account = None
+    for line in csv:
+        if line == "\n":
+            if current_account is not None:
+                accounts.append(current_account)
+            current_account = []
+        else:
+            current_account.append(line)
+
+    if current_account:
+        accounts.append(current_account)
+
+    return accounts
+
 def amount_to_money(amount_string):
     try:
         return float(amount_string.replace('"',''))
@@ -22,8 +39,14 @@ if len(sys.argv) < 2:
 total_means = 0
 for csv in sys.argv[1:]:
     with open(csv, 'r') as f:
-        csv_means = sum_transactions_for(f.readlines())
-        print(f'{csv}: {csv_means:10,.2f}')
+        transactions = f.readlines()
+        accounts = split_by_account(transactions)
+        print(f'\n{csv}')
+        for account in accounts:
+            account_means = sum_transactions_for(account)
+            print(f'{account[0].rstrip()}: {account_means:10,.2f}')
+        csv_means = sum_transactions_for(transactions)
+        print(f'Total: {csv_means:10,.2f}')
         total_means += csv_means
 
-print(f'Total: {total_means:10,.2f}')
+print(f'\nGrand Total: {total_means:10,.2f}')
