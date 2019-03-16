@@ -50,6 +50,5 @@ for csv in sys.argv[1:]:
         csv_means = sum_transactions_for(transactions)
         write_means("Total", csv_means)
         total_means += csv_means
-
-print("\n")
-write_means("Grand Total", total_means)
+        print("\n")
+        write_means("Grand Total", total_means)
