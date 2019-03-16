@@ -29,6 +29,10 @@ def sum_transactions_for(keybank_csv):
                            if '"' in f]
     return sum(transaction_amounts)
 
+def write_means(title, means):
+    print("{0:50}\033[1;{2}m{1:10,.2f}\033[1;m"
+          .format(title, means, "41" if means < 0 else ""))
+
 if len(sys.argv) < 2:
    print(f'usage: keybankcsv.py [glob path of keybank csv files dir]')
    exit(1)
@@ -40,18 +44,12 @@ for csv in sys.argv[1:]:
     with open(csv, 'r') as f:
         transactions = f.readlines()
         accounts = split_by_account(transactions)
-        print(f'\n{csv}')
-        print("-"*60)
+        print(f'\n\033[1;44m{csv:60}\033[1;m\n')
         for account in accounts:
-            account_means = sum_transactions_for(account)
-            print(f'{account[0].rstrip():50}{account_means:10,.2f}')
+            write_means(account[0].rstrip(), sum_transactions_for(account))
         csv_means = sum_transactions_for(transactions)
-        print("-"*60)
-        print("{0:50}{1:10,.2f}".format("Total",csv_means))
-        print("-"*60)
+        write_means("Total", csv_means)
         total_means += csv_means
 
 print("\n")
-print("-"*60)
-print("{0:50}{1:10,.2f}".format("Grand Total", total_means))
-print("-"*60)
+write_means("Grand Total", total_means)
