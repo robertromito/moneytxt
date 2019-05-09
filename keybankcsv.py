@@ -42,7 +42,7 @@ def write_means(title, means):
             amount_width)
 
 if len(sys.argv) < 2:
-   print(f'usage: keybankcsv.py [glob path of keybank csv files dir]')
+   print(f'usage: {sys.argv[0]} [glob path of keybank csv files dir]')
    exit(1)
 
 print("Analysys of Key Bank csv download files:")
