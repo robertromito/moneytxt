@@ -22,6 +22,9 @@ def split_by_account(csv):
 
     return accounts
 
+def transaction_amount(transaction):
+    return transaction.split(",")[1]
+
 def amount_to_money(amount_string):
     try:
         return float(amount_string.replace('"',''))
@@ -29,20 +32,35 @@ def amount_to_money(amount_string):
         return 0.0
 
 def sum_transactions_for(keybank_csv):
-    return sum([amount_to_money((f.split(",")[1]))
+    return sum([amount_to_money((transaction_amount(f)))
                 for f in keybank_csv
                 if '"' in f])
 
-def write_means(title, means):
-    return "{0:{3}}\033[1;{2}m{1:{4},.2f}\033[1;m".format(
+def write_means(title, means, transaction_highlight = ""):
+    return "{0:{3}}\033[1;{2}m{1:{4},.2f}\033[1;m\t{5:50}".format(
             title, 
             means, 
             "41" if means < 0 else "", 
             title_width,
-            amount_width)
+            amount_width,
+            transaction_highlight)
+
+def transaction_sort_key(t):
+    return amount_to_money(transaction_amount(t))
+
+def most_expensive_transaction(account):
+    if len(account) == 2:
+        return ""
+    else:
+        sorted_transactions = sorted(account, key=transaction_amount, reverse=True)
+        transaction_count = len(sorted_transactions)
+        #return sorted_transactions[transaction_count - 3]
+        return sorted_transactions[2]
+
+##########
 
 if len(sys.argv) < 2:
-   print(f'usage: keybankcsv.py [glob path of keybank csv files dir]')
+   print(f'usage: {sys.argv[0]} [glob path of keybank csv files dir]')
    exit(1)
 
 print("Analysys of Key Bank csv download files:")
@@ -57,7 +75,8 @@ for csv in sys.argv[1:]:
         results.append(f'\n\033[1;44m{csv:{screen_cols}}\033[1;m\n')
         for account in accounts:
             account_means = sum_transactions_for(account)
-            results.append(write_means(account[0].rstrip(),account_means))
+            transaction_highlight = most_expensive_transaction(account) 
+            results.append(write_means(account[0].rstrip(),account_means, transaction_highlight))
         csv_means = sum_transactions_for(transactions)
         results.append(write_means("Total", csv_means))
         total_means += csv_means
