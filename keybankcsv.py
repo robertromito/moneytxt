@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 import sys
 import os
+import json
 
 screen_rows, screen_cols = os.popen('stty size', 'r').read().split()
 title_width = 40 
 amount_width = 10 
+
+def get_config():
+    config = {}
+    config_file = os.getcwd() + "/.moneytxt"
+    if os.path.isfile(config_file):
+        print(f'Reading config')
+        with open(config_file, 'r') as f:
+            config = json.loads(f.read())
+    return config
 
 def split_by_account(csv):
     accounts = []
@@ -63,21 +73,27 @@ if len(sys.argv) < 2:
    print(f'usage: {sys.argv[0]} [glob path of keybank csv files dir]')
    exit(1)
 
+config = get_config()
+
 print("Analysys of Key Bank csv download files:")
 
 results = []
 
+
 total_means = 0
 for csv in sys.argv[1:]:
     with open(csv, 'r') as f:
+        csv_means = 0
         transactions = f.readlines()
         accounts = split_by_account(transactions)
         results.append(f'\n\033[1;44m{csv:{screen_cols}}\033[1;m\n')
         for account in accounts:
-            account_means = sum_transactions_for(account)
-            transaction_highlight = most_expensive_transaction(account) 
-            results.append(write_means(account[0].rstrip(),account_means, transaction_highlight))
-        csv_means = sum_transactions_for(transactions)
+            account_id = account[0].rstrip()
+            if account_id.startswith(tuple(config["spending"])):
+                account_means = sum_transactions_for(account)
+                transaction_highlight = most_expensive_transaction(account) 
+                csv_means += account_means
+                results.append(write_means(account_id,account_means, transaction_highlight))
         results.append(write_means("Total", csv_means))
         total_means += csv_means
         results.append("")
