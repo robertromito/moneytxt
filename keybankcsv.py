@@ -7,14 +7,19 @@ screen_rows, screen_cols = os.popen('stty size', 'r').read().split()
 title_width = 40 
 amount_width = 10 
 
-def get_config():
+def get_config(args):
     config = {}
     config_file = os.getcwd() + "/moneytxt.json"
     if os.path.isfile(config_file):
         print(f'Reading config')
         with open(config_file, 'r') as f:
             config = json.loads(f.read())
+    config["accounts_to_analyze"] = ([arg.replace('--', '') for arg in args if arg.startswith('--')] + ['all'])[0]            
     return config
+
+def should_analyze(account_id, config):
+    return config["accounts_to_analyze"] == 'all' or account_id.startswith(tuple(config[config["accounts_to_analyze"]]))
+
 
 def split_by_account(csv):
     accounts = []
@@ -73,12 +78,11 @@ if len(sys.argv) < 2:
    print(f'usage: {sys.argv[0]} [glob path of keybank csv files dir]')
    exit(1)
 
-config = get_config()
+config = get_config(sys.argv[1:])
 
 print("Analysys of Key Bank csv download files:")
 results = []
 
-account_type = ([arg.replace('--', '') for arg in sys.argv[1:] if arg.startswith('--')] + ['spend'])[0]
 total_means = 0
 for csv in [arg for arg in sys.argv[1:] if not arg.startswith('--')]:
     with open(csv, 'r') as f:
@@ -88,7 +92,7 @@ for csv in [arg for arg in sys.argv[1:] if not arg.startswith('--')]:
         results.append(f'\n\033[1;44m{csv:{screen_cols}}\033[1;m\n')
         for account in accounts:
             account_id = account[0].rstrip()
-            if account_id.startswith(tuple(config[account_type])):
+            if should_analyze(account_id, config):
                 account_means = sum_transactions_for(account)
                 transaction_highlight = most_expensive_transaction(account) 
                 csv_means += account_means
