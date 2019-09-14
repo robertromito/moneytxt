@@ -18,7 +18,10 @@ def get_config(args):
     return config
 
 def should_analyze(account_id, config):
-    return config["accounts_to_analyze"] == 'all' or account_id.startswith(tuple(config[config["accounts_to_analyze"]]))
+    if config["accounts_to_analyze"] == 'all': return True
+    if config["accounts_to_analyze"] not in config: return True
+    if account_id.startswith(tuple(config[config["accounts_to_analyze"]])): return True
+    return False
 
 
 def split_by_account(csv):
