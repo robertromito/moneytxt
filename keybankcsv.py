@@ -9,7 +9,7 @@ amount_width = 10
 
 def get_config():
     config = {}
-    config_file = os.getcwd() + "/.moneytxt"
+    config_file = os.getcwd() + "/moneytxt.json"
     if os.path.isfile(config_file):
         print(f'Reading config')
         with open(config_file, 'r') as f:
