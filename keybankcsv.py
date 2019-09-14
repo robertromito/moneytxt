@@ -76,12 +76,11 @@ if len(sys.argv) < 2:
 config = get_config()
 
 print("Analysys of Key Bank csv download files:")
-
 results = []
 
-
+account_type = ([arg.replace('--', '') for arg in sys.argv[1:] if arg.startswith('--')] + ['spend'])[0]
 total_means = 0
-for csv in sys.argv[1:]:
+for csv in [arg for arg in sys.argv[1:] if not arg.startswith('--')]:
     with open(csv, 'r') as f:
         csv_means = 0
         transactions = f.readlines()
@@ -89,7 +88,7 @@ for csv in sys.argv[1:]:
         results.append(f'\n\033[1;44m{csv:{screen_cols}}\033[1;m\n')
         for account in accounts:
             account_id = account[0].rstrip()
-            if account_id.startswith(tuple(config["spending"])):
+            if account_id.startswith(tuple(config[account_type])):
                 account_means = sum_transactions_for(account)
                 transaction_highlight = most_expensive_transaction(account) 
                 csv_means += account_means
